@@ -1,0 +1,95 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+def load_data():
+    # Ask the user for the file path
+    file_path = input("Please enter the path to the CSV file: ")
+    # Load the data from the CSV file
+    df = pd.read_csv(file_path)
+    
+    # Clean the data
+    df = clean_data(df)
+    
+    return df
+
+def clean_data(df):
+    # Remove rows with missing values
+    df = df.dropna(subset=['price', 'neighbourhood','review_scores_rating'])
+    
+    # Convert price to numeric
+    df['price'] = df['price'].str.replace('$', '').str.replace(',', '').astype(float)
+    
+    # Remove outliers in price using the IQR method
+    Q1 = df['price'].quantile(0.25)
+    Q3 = df['price'].quantile(0.75)
+    IQR = Q3 - Q1
+    df = df[~((df['price'] < (Q1 - 1.5 * IQR)) | (df['price'] > (Q3 + 1.5 * IQR)))]
+    
+    return df
+
+def visualize_data(df):
+    # Plot price distribution
+    plt.figure(figsize=(10, 6))
+    sns.histplot(df['price'], bins=50, kde=True)
+    plt.title('Price Distribution')
+    plt.show()
+
+    # Plot availability distribution
+    plt.figure(figsize=(10, 6))
+    sns.histplot(df['availability_365'], bins=50, kde=True)
+    plt.title('Availability Distribution')
+    plt.show()
+
+    # Plot number of listings per neighbourhood
+    plt.figure(figsize=(10, 6))
+    sns.countplot(y='neighbourhood', data=df, order = df['neighbourhood'].value_counts().index[:10])
+    plt.title('Number of Listings per Top 10 Neighbourhoods')
+    plt.show()
+
+    # Plot number of listings per property type
+    plt.figure(figsize=(10, 6))
+    sns.countplot(y='room_type', data=df, order = df['room_type'].value_counts().index)
+    plt.title('Number of Listings per Property Type')
+    plt.show()
+
+def statistical_analysis(df):
+    # Calculate and print the mean, median, and mode of the price
+    print("Price:")
+    print("Mean:", np.mean(df['price']))
+    print("Median:", np.median(df['price']))
+    print("Mode:", df['price'].mode()[0])
+
+    # Calculate and print the mean, median, and mode of the availability
+    print("\\nAvailability:")
+    print("Mean:", np.mean(df['availability_365']))
+    print("Median:", np.median(df['availability_365']))
+    print("Mode:", df['availability_365'].mode()[0])
+
+    # Calculate and print the most common neighbourhood and property type
+    print("\\nMost common neighbourhood:", df['neighbourhood'].mode()[0])
+    print("Most common property type:", df['room_type'].mode()[0])
+
+def main():
+    # Load the data
+    df = load_data()
+    
+    # Visualize the data
+    visualize_data(df)
+
+    # Conduct statistical analysis
+    statistical_analysis(df)
+
+    # Print the findings
+    print("\\nFindings:")
+    print("The average price of Airbnb listings in the city is around", np.mean(df['price']), "dollars.")
+    print("The average availability of Airbnb listings in the city is around", np.mean(df['availability_365']), "days per year.")
+    print("The most common neighbourhood for Airbnb listings in the city is", df['neighbourhood'].mode()[0], ".")
+    print("The most common property type for Airbnb listings in the city is", df['room_type'].mode()[0], ".")
+
+    # Suggest a business plan
+    print("\\nBusiness Plan:")
+    print("Based on the insights gained from the analysis, a potential business plan could be to focus on acquiring properties in the", df['neighbourhood'].mode()[0], "neighbourhood, as it is the most popular neighbourhood for Airbnb listings in the city. Additionally, properties of type", df['room_type'].mode()[0], "could be prioritized, as they are the most common property type for Airbnb listings in the city.")
+# Run the main function
+main()
