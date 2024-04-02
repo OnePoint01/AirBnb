@@ -22,20 +22,11 @@ def clean_data(df):
     # Keep a copy of the excluded columns
     excluded_data = df[exclude_columns]
 
-    # Drop the excluded columns from the original DataFrame
-    df = df.drop(columns=exclude_columns)
+    # Drop all other columns from the DataFrame
+    df = df[exclude_columns]
 
-    # Calculate the threshold for 25% empty cells
-    threshold = len(df) * 0.70
-
-    # Remove columns for calculated threshhold
-    df = df.dropna(thresh=threshold, axis=1)
-
-    # Add the excluded columns back to the DataFrame
-    df = pd.concat([df, excluded_data], axis=1)
-
-    # Drop rows with empty 'price' values
-    df = df.dropna(subset=['price'])
+    # Drop rows with empty values in the excluded columns
+    df = df.dropna(subset=exclude_columns)
 
     # Convert price to numeric
     df['price'] = df['price'].str.replace('$', '').str.replace(',', '').astype(float)
