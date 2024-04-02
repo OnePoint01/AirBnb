@@ -2,10 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-
+#this code will "as I hope" work for every AirBnb listing
 def load_data():
     # Ask the user for the file path
     file_path = input("Please enter the path to the CSV file: ")
+
     # Load the data from the CSV file
     df = pd.read_csv(file_path)
     
@@ -15,9 +16,27 @@ def load_data():
     return df
 
 def clean_data(df):
-    # Remove rows with missing values
-    df = df.dropna(subset=['price', 'neighbourhood','review_scores_rating'])
-    
+    # Specify the columns you want to exclude from dropping
+    exclude_columns = ['price', 'availability_365','location','room_type']
+
+    # Keep a copy of the excluded columns
+    excluded_data = df[exclude_columns]
+
+    # Drop the excluded columns from the original DataFrame
+    df = df.drop(columns=exclude_columns)
+
+    # Calculate the threshold for 25% empty cells
+    threshold = len(df) * 0.70
+
+    # Remove columns for calculated threshhold
+    df = df.dropna(thresh=threshold, axis=1)
+
+    # Add the excluded columns back to the DataFrame
+    df = pd.concat([df, excluded_data], axis=1)
+
+    # Drop rows with empty 'price' values
+    df = df.dropna(subset=['price'])
+
     # Convert price to numeric
     df['price'] = df['price'].str.replace('$', '').str.replace(',', '').astype(float)
     
@@ -44,8 +63,8 @@ def visualize_data(df):
 
     # Plot number of listings per neighbourhood
     plt.figure(figsize=(10, 6))
-    sns.countplot(y='neighbourhood', data=df, order = df['neighbourhood'].value_counts().index[:10])
-    plt.title('Number of Listings per Top 10 Neighbourhoods')
+    sns.countplot(y='location', data=df, order = df['location'].value_counts().index[:10])
+    plt.title('Number of Listings per Top 10 locations')
     plt.show()
 
     # Plot number of listings per property type
@@ -68,13 +87,13 @@ def statistical_analysis(df):
     print("Mode:", df['availability_365'].mode()[0])
 
     # Calculate and print the most common neighbourhood and property type
-    print("\\nMost common neighbourhood:", df['neighbourhood'].mode()[0])
+    print("\\nMost common location:", df['location'].mode()[0])
     print("Most common property type:", df['room_type'].mode()[0])
 
 def main():
     # Load the data
     df = load_data()
-    
+
     # Visualize the data
     visualize_data(df)
 
@@ -85,11 +104,12 @@ def main():
     print("\\nFindings:")
     print("The average price of Airbnb listings in the city is around", np.mean(df['price']), "dollars.")
     print("The average availability of Airbnb listings in the city is around", np.mean(df['availability_365']), "days per year.")
-    print("The most common neighbourhood for Airbnb listings in the city is", df['neighbourhood'].mode()[0], ".")
+    print("The most common location for Airbnb listings in the city is", df['location'].mode()[0], ".")
     print("The most common property type for Airbnb listings in the city is", df['room_type'].mode()[0], ".")
 
     # Suggest a business plan
     print("\\nBusiness Plan:")
-    print("Based on the insights gained from the analysis, a potential business plan could be to focus on acquiring properties in the", df['neighbourhood'].mode()[0], "neighbourhood, as it is the most popular neighbourhood for Airbnb listings in the city. Additionally, properties of type", df['room_type'].mode()[0], "could be prioritized, as they are the most common property type for Airbnb listings in the city.")
+    print("Based on the insights gained from the analysis, a potential business plan could be to focus on acquiring properties in the", df['location'].mode()[0], "location, as it is the most popular location for Airbnb listings in the city. Additionally, properties of type", df['room_type'].mode()[0], "could be prioritized, as they are the most common property type for Airbnb listings in the city.")
+
 # Run the main function
 main()
