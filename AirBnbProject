@@ -1,8 +1,10 @@
+#this code "as I hope" will work for every AirBnb listing
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-#this code will "as I hope" work for every AirBnb listing
+
 def load_data():
     # Ask the user for the file path
     file_path = input("Please enter the path to the CSV file: ")
@@ -17,11 +19,8 @@ def load_data():
 
 def clean_data(df):
     # Specify the columns you want to exclude from dropping
-    exclude_columns = ['price', 'availability_365','location','room_type']
-
-    # Keep a copy of the excluded columns
-    excluded_data = df[exclude_columns]
-
+    exclude_columns = ['price', 'availability_365','location','property_type']
+    
     # Drop all other columns from the DataFrame
     df = df[exclude_columns]
 
@@ -52,7 +51,7 @@ def visualize_data(df):
     plt.title('Availability Distribution')
     plt.show()
 
-    # Plot number of listings per neighbourhood
+    # Plot number of listings per location
     plt.figure(figsize=(10, 6))
     sns.countplot(y='location', data=df, order = df['location'].value_counts().index[:10])
     plt.title('Number of Listings per Top 10 locations')
@@ -60,7 +59,7 @@ def visualize_data(df):
 
     # Plot number of listings per property type
     plt.figure(figsize=(10, 6))
-    sns.countplot(y='room_type', data=df, order = df['room_type'].value_counts().index)
+    sns.countplot(y='property_type', data=df, order = df['property_type'].value_counts().index)
     plt.title('Number of Listings per Property Type')
     plt.show()
 
@@ -72,14 +71,33 @@ def statistical_analysis(df):
     print("Mode:", df['price'].mode()[0])
 
     # Calculate and print the mean, median, and mode of the availability
-    print("\\nAvailability:")
+    print("\nAvailability:")
     print("Mean:", np.mean(df['availability_365']))
     print("Median:", np.median(df['availability_365']))
     print("Mode:", df['availability_365'].mode()[0])
 
-    # Calculate and print the most common neighbourhood and property type
-    print("\\nMost common location:", df['location'].mode()[0])
-    print("Most common property type:", df['room_type'].mode()[0])
+    # Calculate and print the most common location and property type
+    print("\nMost common location:", df['location'].mode()[0])
+    print("Most common property type:", df['property_type'].mode()[0])
+
+def Findings(df):
+    # Print the findings
+    print("\nFindings:")
+    print("The average price of Airbnb listings in the city is around", np.mean(df['price']), "dollars.")
+    print("The average availability of Airbnb listings in the city is around", np.mean(df['availability_365']), "days per year.")
+    print("The most common location for Airbnb listings in the city is", df['location'].mode()[0], ".")
+    print("The most common property type for Airbnb listings in the city is", df['property_type'].mode()[0], ".")
+
+def business_plan(df):
+    # Suggest a business plan
+    print("\nBusiness Plan:")
+    print("Based on the insights gained from the analysis,")
+    print("a potential business plan could be to focus on acquiring properties in the", df['location'].mode()[0], "location, \nas it is the most popular location for Airbnb listings in the city.")
+    print("Additionally, properties of type", df['property_type'].mode()[0], "could be prioritized, \nas they are the most common property type for Airbnb listings in the city.")
+    print("Lastly, the recommended price should be",df['price'].mode()[0],"Dollar, as it's the most pobular pricing in the city")
+
+def Save_new_dataset(df):
+    df.to_csv("NewCleanedListing.csv")
 
 def main():
     # Load the data
@@ -91,16 +109,14 @@ def main():
     # Conduct statistical analysis
     statistical_analysis(df)
 
-    # Print the findings
-    print("\\nFindings:")
-    print("The average price of Airbnb listings in the city is around", np.mean(df['price']), "dollars.")
-    print("The average availability of Airbnb listings in the city is around", np.mean(df['availability_365']), "days per year.")
-    print("The most common location for Airbnb listings in the city is", df['location'].mode()[0], ".")
-    print("The most common property type for Airbnb listings in the city is", df['room_type'].mode()[0], ".")
+    # print the Findings
+    Findings(df)
 
-    # Suggest a business plan
-    print("\\nBusiness Plan:")
-    print("Based on the insights gained from the analysis, a potential business plan could be to focus on acquiring properties in the", df['location'].mode()[0], "location, as it is the most popular location for Airbnb listings in the city. Additionally, properties of type", df['room_type'].mode()[0], "could be prioritized, as they are the most common property type for Airbnb listings in the city.")
+    # print the business plan
+    business_plan(df)
+
+    # Save the modified dataset to a new csv file 
+    Save_new_dataset(df)
 
 # Run the main function
 main()
